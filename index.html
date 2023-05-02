@@ -14,7 +14,7 @@
     <script>
         const ejecutar = () =>{
             var tensor = tf.tensor(["3.2","2.6","7.7","40","8.3","3.1",[3,2]])
-            console.log(tensor)
+            tensor.print()
             var matriz02 = [
                 [10,20,30,50],
                 [44,22,66,44],
@@ -22,10 +22,73 @@
             ]
 
             var tensor02 = tf.tensor(matriz02)
-            console.log(tensor02)
+            tensor02.print()
         }
 
+        const tidyAndKeep = () =>{
+            // Comenzar en cero tensores
+            console.log('start', tf.memory().numTensors)
+            let keeper 
+            let chaser
+            let seeker
+            let beater // Ahora crearemos tensores dentro de un orden 
+            tf.tidy(() =>{ 
+                keeper = tf.tensor([1,2,3]); 
+                chaser = tf.tensor([1,2,3]);
+                seeker = tf.tensor([1,2,3]); 
+                beater = tf.tensor([1,2,3])
+                // Ahora estamos en cuatro tensores en la memoria 
+                console.log('dentro ordenado', tf.memory().numTensors)
+                // protege un tensor
+                tf.keep(keeper) 
+                // los tensores devueltos sobreviven
+                return chaser
+                })
+            // Hasta dos
+            console.log('después de ordenar', tf.memory().numTensors)
+            keeper.dispose()
+            chaser.dispose()
+            // Volver a cero
+            console.log('end', tf.memory().numTensors)
+        }
+
+        const bandas = () =>{
+            const usuarios = ['Gant', 'Todd', 'Jed', 'Justin'] 
+            const bandas = ['Nirvana','Uñas de nueve pulgadas','Backstreet Boys','N sincronización','Club nocturno','apashe','PLS']
+            const genero = ['grunge','Rock','Industrial','Banda de chicos','Danza','Tecno']
+            // Votos de usuario 
+            const user_votes = tf.tensor([
+                 [10, 9, 1, 1, 8, 7, 8], [6, 8, 2, 2, 0, 10, 0], 
+                 [0, 2, 10 , 9, 3, 7, 0], [7, 4, 2, 3, 6, 5, 5] 
+            ])
+            // Estilos musicales
+            const band_feats = tf.tensor([ 
+                [1, 1,0, 0, 0, 0], [1, 0, 1, 0, 0, 0], 
+                [0, 0,0, 1, 1 , 0], [0, 0, 0, 1, 0, 0], 
+                [0, 0,1, 0, 0, 1], [0, 0, 1, 0, 0, 1], 
+                [1, 1 ,0, 0, 0, 0] 
+            ])
+            
+            // estilos favoritos del usuario
+            const user_feats = tf.matMul(user_votes, band_feats)
+            // Imprime las respuestas
+            user_feats.print()
+
+            // Hagámoslos bonitos const
+            top_user_features = tf.topk(user_feats, genero.length)
+            // Volver a JavaScript
+            const top_genres = top_user_features.indices.arraySync() 
+            // imprime los resultados 
+            usuarios.map((u, i) => {
+                const clasificacion = top_genres [i].map(v => genero[v])
+                console.log(u, clasificacion) 
+            })
+        }
+
+
         ejecutar()
+        tidyAndKeep()
+        bandas()
     </script>
 </body>
 </html>
