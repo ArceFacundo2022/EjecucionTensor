@@ -4,14 +4,46 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
     <title>MatrizTensor</title>
 </head>
 <body>
-    <h1>Tensor</h1>
+    <header style="background-color: rgb(87, 179, 255);">
+        <div style="background-color: rgb(87, 179, 255);" class="container d-flex align-items-center">
+            <h1 style="margin-right: 40px;">TensorFlow</h1>
+            <div style="margin-right: 40px;">
+                <a type="button" onclick="ejectTensor()"><h5 style="color: aliceblue;">Ejectutar TensorFlow</h5></a>
+            </div>
+            <div style="margin-right: 40px;">
+                <a type="button" onclick=""><h5 style="color: aliceblue;">Tidy And Keep</h5></a>
+            </div>
+            <div style="margin-right: 40px;">
+                <a type="button" onclick=""><h5 style="color: aliceblue;">Ranking de Bandas</h5></a>
+            </div>
+            <div style="margin-right: 40px;">
+                <a type="button" onclick=""><h5 style="color: aliceblue;">Regresion Lineal Simple</h5></a>
+            </div>
+        </div>
+    </header>
+    <h1 style="margin-top: 20px; text-align: center; margin-bottom: 20px;" id="title">Tensor</h1>
+    <div id="bodyPage" class="container" style="text-align: center ;">
+        <input type="button" id="button01" value="Entrenar" onclick="entrenamiento()"></input>
+        <br>
+        <input type="text" id="text01">
+        <br>
+        <input type="button" id="button02" value="Predecir" onclick="predecir()"></input>
+        <br>
+        <input type="text" id="text02">
+        <br>
+        <div id="result"></div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
 
     <script>
+        // Create a simple model.
+        const model = tf.sequential();
+
         const ejecutar = () =>{
             var tensor = tf.tensor(["3.2","2.6","7.7","40","8.3","3.1",[3,2]])
             tensor.print()
@@ -23,6 +55,7 @@
 
             var tensor02 = tf.tensor(matriz02)
             tensor02.print()
+            document.getElementById('result').innerText = tensor02
         }
 
         const tidyAndKeep = () =>{
@@ -85,10 +118,57 @@
             })
         }
 
+        const entrenamiento = async () => {
+            model.add(tf.layers.dense({units: 1, inputShape: [1]}));
 
-        ejecutar()
+            // Prepare the model for training: Specify the loss and the optimizer.
+            model.compile({loss: 'meanSquaredError', optimizer: 'sgd'});
+
+            // Generate some synthetic data for training. (y = 2x - 1)
+            const xs = tf.tensor2d([-1, 0, 1, 2, 3, 4], [6, 1]);
+            const ys = tf.tensor2d([-3, -1, 1, 3, 5, 7], [6, 1]);
+            const result=await model.fit(xs, ys, {epochs: 250});
+
+            // Train the model using the data.
+            return console.log(result)
+        }
+
+        function predecir(){
+            document.getElementById('result').innerText = model.predict(tf.tensor2d([20], [1, 1])).dataSync();
+
+        }
+
+        const ejectTensor = () => {
+            const ejectTensorHtml = `
+            <input type="button" id="button01" value="Ejecutar Tensor" onclick="ejecutar()"></input>
+                <br>
+                <input hidden=true type="text" id="text01">
+                <br>
+                <input hidden=true type="button" id="button02" value="Predecir" onclick="predecir()"></input>
+                <br>
+                <input hidden=true type="text" id="text02">
+                <br>
+            <div id="result"></div>`
+            document.getElementById('title').innerHTML= "Ejecutar Tensor en el Navegador"
+            document.getElementById('bodyPage').innerHTML = ejectTensorHtml
+        }
+
+        const Tidy = () => {
+            const TidyandKeepHtml = `
+            <input type="button" id="button01" value="Ejecutar Tensor" onclick="ejecutar()"></input>
+                <br>
+                <input hidden=true type="text" id="text01">
+                <br>
+                <input hidden=true type="button" id="button02" value="Predecir" onclick="predecir()"></input>
+                <br>
+                <input hidden=true type="text" id="text02">
+                <br>
+            <div id="result"></div>`
+            document.getElementById('title').innerHTML= "Ejercicio Tidy and Keep"
+            document.getElementById('bodyPage').innerHTML = TidyandKeepHtml
+        }
+
         tidyAndKeep()
-        bandas()
     </script>
 </body>
 </html>
