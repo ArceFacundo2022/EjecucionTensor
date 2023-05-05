@@ -15,27 +15,18 @@
                 <a type="button" onclick="ejectTensor()"><h5 style="color: aliceblue;">Ejectutar TensorFlow</h5></a>
             </div>
             <div style="margin-right: 40px;">
-                <a type="button" onclick=""><h5 style="color: aliceblue;">Tidy And Keep</h5></a>
+                <a type="button" onclick="Tidy()"><h5 style="color: aliceblue;">Tidy And Keep</h5></a>
             </div>
             <div style="margin-right: 40px;">
-                <a type="button" onclick=""><h5 style="color: aliceblue;">Ranking de Bandas</h5></a>
+                <a type="button" onclick="Ranking()"><h5 style="color: aliceblue;">Ranking de Bandas</h5></a>
             </div>
             <div style="margin-right: 40px;">
-                <a type="button" onclick=""><h5 style="color: aliceblue;">Regresion Lineal Simple</h5></a>
+                <a type="button" onclick="Lineal()"><h5 style="color: aliceblue;">Regresion Lineal Simple</h5></a>
             </div>
         </div>
     </header>
     <h1 style="margin-top: 20px; text-align: center; margin-bottom: 20px;" id="title">Tensor</h1>
     <div id="bodyPage" class="container" style="text-align: center ;">
-        <input type="button" id="button01" value="Entrenar" onclick="entrenamiento()"></input>
-        <br>
-        <input type="text" id="text01">
-        <br>
-        <input type="button" id="button02" value="Predecir" onclick="predecir()"></input>
-        <br>
-        <input type="text" id="text02">
-        <br>
-        <div id="result"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
@@ -59,8 +50,9 @@
         }
 
         const tidyAndKeep = () =>{
+            let html = ""
             // Comenzar en cero tensores
-            console.log('start', tf.memory().numTensors)
+            html += 'Comienzo lectura de memoria ' + tf.memory().numTensors + '\n'
             let keeper 
             let chaser
             let seeker
@@ -71,18 +63,19 @@
                 seeker = tf.tensor([1,2,3]); 
                 beater = tf.tensor([1,2,3])
                 // Ahora estamos en cuatro tensores en la memoria 
-                console.log('dentro ordenado', tf.memory().numTensors)
+                html += 'Luego dentro ordenado ' + tf.memory().numTensors + '\n'
                 // protege un tensor
                 tf.keep(keeper) 
                 // los tensores devueltos sobreviven
                 return chaser
                 })
             // Hasta dos
-            console.log('después de ordenar', tf.memory().numTensors)
+            html += 'después de ordenar ' + tf.memory().numTensors + '\n'
             keeper.dispose()
             chaser.dispose()
             // Volver a cero
-            console.log('end', tf.memory().numTensors)
+            html += 'Final del Proceso ' + tf.memory().numTensors + '\n'
+            document.getElementById('result').innerText = html
         }
 
         const bandas = () =>{
@@ -104,8 +97,9 @@
             
             // estilos favoritos del usuario
             const user_feats = tf.matMul(user_votes, band_feats)
-            // Imprime las respuestas
-            user_feats.print()
+
+            let htmlBand = ""
+            htmlBand += user_feats + "\n \n ----| Ranking Bandas |---- \n"
 
             // Hagámoslos bonitos const
             top_user_features = tf.topk(user_feats, genero.length)
@@ -114,11 +108,13 @@
             // imprime los resultados 
             usuarios.map((u, i) => {
                 const clasificacion = top_genres [i].map(v => genero[v])
-                console.log(u, clasificacion) 
+                htmlBand += u + " : " + clasificacion + "\n"
             })
+            document.getElementById('result').innerText = htmlBand
         }
 
         const entrenamiento = async () => {
+            const repeat = parseInt(document.getElementById('text01').value)
             model.add(tf.layers.dense({units: 1, inputShape: [1]}));
 
             // Prepare the model for training: Specify the loss and the optimizer.
@@ -127,27 +123,23 @@
             // Generate some synthetic data for training. (y = 2x - 1)
             const xs = tf.tensor2d([-1, 0, 1, 2, 3, 4], [6, 1]);
             const ys = tf.tensor2d([-3, -1, 1, 3, 5, 7], [6, 1]);
-            const result=await model.fit(xs, ys, {epochs: 250});
+            const result=await model.fit(xs, ys, {epochs: repeat});
 
             // Train the model using the data.
             return console.log(result)
         }
 
         function predecir(){
-            document.getElementById('result').innerText = model.predict(tf.tensor2d([20], [1, 1])).dataSync();
+            const x = parseInt(document.getElementById('text02').value)
+            document.getElementById('result').innerText = model.predict(tf.tensor2d([x], [1, 1])).dataSync();
 
         }
 
         const ejectTensor = () => {
             const ejectTensorHtml = `
             <input type="button" id="button01" value="Ejecutar Tensor" onclick="ejecutar()"></input>
-                <br>
-                <input hidden=true type="text" id="text01">
-                <br>
-                <input hidden=true type="button" id="button02" value="Predecir" onclick="predecir()"></input>
-                <br>
-                <input hidden=true type="text" id="text02">
-                <br>
+            <br>
+            <hr>
             <div id="result"></div>`
             document.getElementById('title').innerHTML= "Ejecutar Tensor en el Navegador"
             document.getElementById('bodyPage').innerHTML = ejectTensorHtml
@@ -155,20 +147,38 @@
 
         const Tidy = () => {
             const TidyandKeepHtml = `
-            <input type="button" id="button01" value="Ejecutar Tensor" onclick="ejecutar()"></input>
-                <br>
-                <input hidden=true type="text" id="text01">
-                <br>
-                <input hidden=true type="button" id="button02" value="Predecir" onclick="predecir()"></input>
-                <br>
-                <input hidden=true type="text" id="text02">
-                <br>
+            <input type="button" id="button01" value="Ejecutar" onclick="tidyAndKeep()"></input>
+            <br>
+            <hr>
             <div id="result"></div>`
             document.getElementById('title').innerHTML= "Ejercicio Tidy and Keep"
             document.getElementById('bodyPage').innerHTML = TidyandKeepHtml
         }
 
-        tidyAndKeep()
+        const Ranking = () => {
+            const bandasHtml = `
+            <input type="button" id="button01" value="Raking" onclick="bandas()"></input>
+                <br>
+                <hr>
+            <div id="result"></div>`
+            document.getElementById('title').innerHTML= "Ranking Bandas"
+            document.getElementById('bodyPage').innerHTML = bandasHtml
+        }
+
+        const Lineal = () => {
+            const linealSimpleHtml = `
+            <input type="button" id="button01" value="Entrenar" onclick="entrenamiento()"></input>
+                <br>
+                <input type="text" id="text01">
+                <br>
+                <input type="button" id="button02" value="Predecir" onclick="predecir()"></input>
+                <br>
+                <input type="text" id="text02">
+                <hr>
+            <div id="result"></div>`
+            document.getElementById('title').innerHTML= "Regresión lineal simple"
+            document.getElementById('bodyPage').innerHTML = linealSimpleHtml
+        }
     </script>
 </body>
 </html>
